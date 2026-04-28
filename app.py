@@ -6,35 +6,37 @@ import os
 # --- 1. CONFIGURATION ---
 st.set_page_config(page_title="RapidKL Food Finder", page_icon="🚆", layout="wide")
 
-# --- 2. CSS STYLING (THEME-FRIENDLY VERSION) ---
+# --- 2. CSS STYLING (THEME-FRIENDLY & CLEAN) ---
 st.markdown("""
     <style>
-    /* This makes sure the primary highlights match your branding */
+    /* Global branding */
     :root { --st-primary-color: #888888; }
-    
-    /* Better borders for the dropdowns that work in both modes */
+
+    /* Fix invisible text by letting Streamlit handle colors, only styling borders */
     div[data-baseweb="select"] { 
         border: 1px solid rgba(128, 128, 128, 0.3) !important; 
         border-radius: 4px !important; 
     }
-    
-    /* Clean up the expanders and make text visible in both themes */
+
+    /* Remove expander styling clutter */
     [data-testid="stExpander"] { 
         border: none !important; 
         background: transparent !important; 
         box-shadow: none !important; 
     }
-    
-    /* Remove hardcoded white so it adapts to Light/Dark mode */
+
     summary { 
         border-bottom: 1px solid rgba(128, 128, 128, 0.2) !important; 
         padding-bottom: 5px !important;
     }
-    
-    /* Hide the default expander arrow for a cleaner look */
+
+    /* HIDE THE ANNOYING TOOLBAR (Download/Search) on all dataframes */
+    [data-testid="stElementToolbar"] {
+        display: none;
+    }
+
     [data-testid="stExpander"] svg { display: none !important; }
-    
-    /* Table styling that adapts */
+
     thead tr th { 
         text-transform: uppercase; 
         border-bottom: 1px solid rgba(128, 128, 128, 0.3) !important; 
@@ -49,17 +51,17 @@ def load_data():
     try:
         with open('data.json', 'r', encoding='utf-8') as f:
             data = json.load(f)
-            if not data: return pd.DataFrame()
             return pd.DataFrame(data)
     except:
         return pd.DataFrame()
 
-
 # --- 4. MAIN INTERFACE ---
 st.sidebar.title("🚆 RapidKL Finder")
 food_df = load_data()
-LINE_MAP = {"Kelana Jaya Line": "🔴", "Kajang Line": "🟢", "Putrajaya Line": "🟡", "Ampang Line": "🟠",
-            "Sri Petaling Line": "🟤", "KL Monorail": "🟢"}
+LINE_MAP = {
+    "Kelana Jaya Line": "🔴", "Kajang Line": "🟢", "Putrajaya Line": "🟡", 
+    "Ampang Line": "🟠", "Sri Petaling Line": "🟤", "KL Monorail": "🟢"
+}
 
 if not food_df.empty:
     available_lines = sorted(list(food_df['line'].unique()))
@@ -79,22 +81,37 @@ if not food_df.empty:
 
         with col_main:
             with st.expander(header_text):
-                # We clean 'food' here just in case the JSON has old messy data
-                cuisine = row['food'] if isinstance(row['food'], str) and '[' not in str(
-                    row['food']) else "Local Cuisine"
+                cuisine = row['food'] if isinstance(row['food'], str) and '[' not in str(row['food']) else "Local Cuisine"
                 st.write(f"**Cuisine:** {cuisine} | **Hours:** {row['opening']} - {row['closing']}")
 
                 if 'menu' in row and isinstance(row['menu'], list):
                     menu_df = pd.DataFrame(row['menu'])
                     if not menu_df.empty:
-                        menu_df.columns = [str(c).upper() for c in menu_df.columns]
-                        if 'PRICE' in menu_df.columns:
-                            menu_df['PRICE'] = menu_df['PRICE'].apply(lambda x: f"RM {float(x):.2f}")
-                        st.dataframe(menu_df, use_container_width=True, hide_index=True)
+                        # Professional Table Config
+                        st.dataframe(
+                            menu_df, 
+                            use_container_width=True, 
+                            hide_index=True,
+                            column_config={
+                                "item": st.column_config.TextColumn("ITEM"),
+                                "price": st.column_config.NumberColumn("PRICE", format="RM %.2f")
+                            }
+                        )
 
         with col_btn:
-            btn_html = f"""<div style="display: flex; justify-content: center; align-items: center; height: 28px; padding-top: 2px;"><button onclick="navigator.clipboard.writeText('{row['name']}')" style="background: none; border: none; color: #555; cursor: pointer; padding: 0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div>"""
-            st.components.v1.html(btn_html, height=35)
+            # Clipboard button inside a clean container
+            btn_html = f"""
+            <div style="display: flex; justify-content: center; align-items: center; height: 35px;">
+                <button onclick="navigator.clipboard.writeText('{row['name']}')" 
+                        style="background:none; border:none; color:#888; cursor:pointer;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+            </div>
+            """
+            st.components.v1.html(btn_html, height=40)
 
         st.markdown("---")
 else:
