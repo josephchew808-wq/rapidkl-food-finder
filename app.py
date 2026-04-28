@@ -6,19 +6,41 @@ import os
 # --- 1. CONFIGURATION ---
 st.set_page_config(page_title="RapidKL Food Finder", page_icon="🚆", layout="wide")
 
-# --- 2. CSS STYLING ---
+# --- 2. CSS STYLING (THEME-FRIENDLY VERSION) ---
 st.markdown("""
     <style>
-    :root { --st-primary-color: #888888 !important; }
-    div[data-baseweb="select"] { border: 1px solid #444 !important; border-radius: 4px !important; background-color: #262730 !important; }
-    [data-testid="stExpander"] { border: none !important; background: transparent !important; box-shadow: none !important; padding: 0px !important; }
-    summary { border: none !important; padding: 0px !important; color: white !important; }
+    /* This makes sure the primary highlights match your branding */
+    :root { --st-primary-color: #888888; }
+    
+    /* Better borders for the dropdowns that work in both modes */
+    div[data-baseweb="select"] { 
+        border: 1px solid rgba(128, 128, 128, 0.3) !important; 
+        border-radius: 4px !important; 
+    }
+    
+    /* Clean up the expanders and make text visible in both themes */
+    [data-testid="stExpander"] { 
+        border: none !important; 
+        background: transparent !important; 
+        box-shadow: none !important; 
+    }
+    
+    /* Remove hardcoded white so it adapts to Light/Dark mode */
+    summary { 
+        border-bottom: 1px solid rgba(128, 128, 128, 0.2) !important; 
+        padding-bottom: 5px !important;
+    }
+    
+    /* Hide the default expander arrow for a cleaner look */
     [data-testid="stExpander"] svg { display: none !important; }
-    thead tr th { text-transform: uppercase; color: #888888 !important; border-bottom: 1px solid #333 !important; }
-    hr { border-top: 1px solid #333 !important; margin: 15px 0 !important; }
+    
+    /* Table styling that adapts */
+    thead tr th { 
+        text-transform: uppercase; 
+        border-bottom: 1px solid rgba(128, 128, 128, 0.3) !important; 
+    }
     </style>
 """, unsafe_allow_html=True)
-
 
 # --- 3. DATA LOADING ---
 @st.cache_data
