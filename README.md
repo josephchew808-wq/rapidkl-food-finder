@@ -9,3 +9,5 @@ The AI outputs raw JSON which is immediately ready for use.
 Additionally, the system uses a decoupled architecture. 
 I run the AI scouting agent locally to ensure data integrity and manage API costs. 
 Once the AI generates the new JSON database, I push it to GitHub, which triggers a continuous deployment to the Streamlit frontend.
+
+https://rapidkl-food-finder.streamlit.app/
